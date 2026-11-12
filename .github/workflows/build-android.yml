@@ -1,0 +1,46 @@
+name: Build Flutter APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0' # Pastikan versi ini sesuai dengan yang di komputer/HP Anda
+          channel: 'stable'
+          cache: true
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      # Membangun APK dengan split per ABI (arm64, armeabi, x86)
+      - name: Build APK
+        run: flutter build apk --release --split-per-abi
+
+      # Mengunggah semua file APK yang dihasilkan
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Manta-APK
+          # Tanda bintang (*) akan mengambil semua file apk hasil split
+          path: build/app/outputs/flutter-apk/*.apk
+          if-no-files-found: error
