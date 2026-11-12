@@ -36,7 +36,7 @@ Future<void> loadConfig() async {
     final githubRes = await http
         .get(
           Uri.parse(
-            "https://raw.githubusercontent.com/gajelas0196-lgtm/Zijii/refs/heads/main/config.json",
+            "https://raw.githubusercontent.com/gajelas0196-lgtm/Zijii/main/Config.json",
           ),
         )
         .timeout(const Duration(seconds: 5)); // Waktu tunggu dipersingkat jadi 5 detik
