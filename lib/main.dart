@@ -13,7 +13,8 @@ import 'seller_page.dart';
 import 'admin_page.dart';
 import 'landing.dart';
 
-String baseUrl = "http://alya-market.duckdns.top:2010";
+// URL Default (Ganti dengan URL server Pterodactyl kamu yang benar)
+String baseUrl = "http://public.zhaher.my.id:4384"; 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,49 +23,58 @@ Future<void> main() async {
   );
   await Hive.initFlutter();
   await Hive.openBox('finance_box');
+  
+  // Panggil loadConfig (hanya sekali jalan, tidak di-looping)
   await loadConfig();
 
   runApp(const MyApp());
 }
 
 Future<void> loadConfig() async {
-  while (true) {
-    try {
-      final githubRes = await http
-          .get(
-            Uri.parse(
-              "https://raw.githubusercontent.com/gajelas0196-lgtm/Zijii/refs/heads/main/config.json",
-            ),
-          )
-          .timeout(const Duration(seconds: 8));
+  // 1. Coba ambil dari GitHub
+  try {
+    final githubRes = await http
+        .get(
+          Uri.parse(
+            "https://raw.githubusercontent.com/gajelas0196-lgtm/Zijii/refs/heads/main/config.json",
+          ),
+        )
+        .timeout(const Duration(seconds: 5)); // Waktu tunggu dipersingkat jadi 5 detik
 
-      if (githubRes.statusCode == 200) {
-        final data = jsonDecode(githubRes.body);
-        if (data["base_url"] != null &&
-            data["base_url"].toString().isNotEmpty) {
-          baseUrl = data["base_url"];
-          return;
-        }
+    if (githubRes.statusCode == 200) {
+      final data = jsonDecode(githubRes.body);
+      if (data["base_url"] != null &&
+          data["base_url"].toString().isNotEmpty) {
+        baseUrl = data["base_url"];
+        print("Config berhasil dimuat dari GitHub: $baseUrl");
+        return; // Keluar dari fungsi jika berhasil
       }
-    } catch (_) {}
-
-    try {
-      final serverRes = await http
-          .get(Uri.parse("http://alya-market.duckdns.top:2010/config.json"))
-          .timeout(const Duration(seconds: 8));
-
-      if (serverRes.statusCode == 200) {
-        final data = jsonDecode(serverRes.body);
-        if (data["base_url"] != null &&
-            data["base_url"].toString().isNotEmpty) {
-          baseUrl = data["base_url"];
-          return;
-        }
-      }
-    } catch (_) {}
-
-    await Future.delayed(const Duration(seconds: 3));
+    }
+  } catch (e) {
+    print("Gagal ambil config dari GitHub: $e");
   }
+
+  // 2. Jika GitHub gagal, coba ambil dari URL Default (Server)
+  try {
+    final serverRes = await http
+        .get(Uri.parse("$baseUrl/config.json"))
+        .timeout(const Duration(seconds: 5));
+
+    if (serverRes.statusCode == 200) {
+      final data = jsonDecode(serverRes.body);
+      if (data["base_url"] != null &&
+          data["base_url"].toString().isNotEmpty) {
+        baseUrl = data["base_url"];
+        print("Config berhasil dimuat dari Server: $baseUrl");
+        return; // Keluar dari fungsi jika berhasil
+      }
+    }
+  } catch (e) {
+    print("Gagal ambil config dari Server: $e");
+  }
+
+  // 3. Jika dua-duanya gagal, aplikasi tetap lanjut pakai URL default di atas
+  print("Menggunakan URL Default: $baseUrl");
 }
 
 class MyApp extends StatelessWidget {
