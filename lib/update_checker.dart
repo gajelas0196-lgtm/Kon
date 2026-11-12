@@ -17,7 +17,7 @@ class UpdateChecker {
       final response = await http.get(
         Uri.parse('https://api.github.com/repos/$githubRepo/releases/latest'),
         headers: {'Accept': 'application/vnd.github.v3+json'},
-      ).timeout(const Duration(seconds: 10));
+      ).timeout(const Duration(seconds: 3));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
