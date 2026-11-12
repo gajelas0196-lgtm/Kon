@@ -97,7 +97,17 @@ class MyApp extends StatelessWidget {
       onGenerateRoute: (settings) {
         switch (settings.name) {
           case '/':
-            return MaterialPageRoute(builder: (_) => const LandingPage());
+  return MaterialPageRoute(
+    builder: (_) => const Scaffold(
+      backgroundColor: Colors.red, // Warna merah biar kelihatan jelas
+      body: Center(
+        child: Text(
+          "TES BERHASIL",
+          style: TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.bold),
+        ),
+      ),
+    ),
+  );
 
           case '/login':
             return MaterialPageRoute(builder: (_) => const LoginPage());
